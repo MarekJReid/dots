@@ -1,143 +1,201 @@
-# set modifier
-set $super Mod4
-set $alt Mod1
+# i3 config file (v4)
 
-# set font
-font pango: Noto Sans 8
+font pango:JetBrainsMono 14
 
-# Use Mouse+$super to drag floating windows to their wanted position
-floating_modifier $super
+# -- Variables --
 
-#autostart
-exec --no-startup-id hsetroot -center ~/.wallpaper.png
-exec --no-startup-id xsettingsd &
-exec --no-startup-id compton -b
+# set mod to win key
+set $mod Mod4
+
+# set path to wallpaper
+set $wallpaper /home/tone/Desktop/background.png
+
+# use catppuccin palette
+set $rosewater #f5e0dc
+set $flamingo  #f2cdcd
+set $pink      #f5c2e7
+set $mauve     #cba6f7
+set $red       #f38ba8
+set $maroon    #eba0ac
+set $peach     #fab387
+set $green     #a6e3a1
+set $teal      #94e2d5
+set $sky       #89dceb
+set $sapphire  #74c7ec
+set $blue      #89b4fa
+set $lavender  #b4befe
+set $text      #cdd6f4
+set $subtext1  #bac2de
+set $subtext0  #a6adc8
+set $overlay2  #9399b2
+set $overlay1  #7f849c
+set $overlay0  #6c7086
+set $surface2  #585b70
+set $surface1  #45475a
+set $surface0  #313244
+set $base      #1e1e2e
+set $mantle    #181825
+set $crust     #11111b
+
+# target                 title     bg    text   indicator  border
+client.focused           $surface0 $base $text  $surface0  $surface0
+client.focused_inactive  $surface1 $base $text  $surface1  $surface1
+client.unfocused         $surface1 $base $text  $surface1  $surface1
+client.urgent            $peach    $base $peach $overlay0  $peach
+client.placeholder       $overlay0 $base $text  $overlay0  $overlay0
+client.background        $base
+
+# use pactl to adjust volume in pulseaudio
+set $refresh_i3status killall -SIGUSR1 i3status
+
+# define names for default workspaces for which we configure key bindings later on.
+# we use variables to avoid repeating the names in multiple places.
+set $ws0 "1"
+set $ws1 "2"
+set $ws2 "3"
+set $ws3 "4"
+
+for_window [class="Rofi" instance="rofi"] floating enable
+
+# -- Exec --
+
+# start XDG autostart .desktop files using dex. see also
+# https://wiki.archlinux.org/index.php/XDG_Autostart
+exec --no-startup-id dex --autostart --environment i3
+
+# The combination of xss-lock, nm-applet and pactl is a popular choice, so
+# they are included here as an example. Modify as you see fit.
+
+# exec --no-startup-id nm-applet
+exec --no-startup-id xrandr --output Virtual-1 --mode 2048x1152
+exec --no-startup-id greenclip daemon
+exec --no-startup-id xsettingsd
+exec --no-startup-id udiskie --no-notify
+exec --no-startup-id brightnessctl set 100%+ 
+exec --no-startup-id feh --bg-scale $wallpaper
+exec --no-startup-id xss-lock --transfer-sleep-lock -- sh /home/tone/.local/share/bin/lock.sh
+exec --no-startup-id systemd-inhibit --what=handle-power-key sleep infinity
+exec_always --no-startup-id ~/.config/polybar/launch.sh
+exec_always --no-startup-id picom 
+exec_always --no-startup-id ~/.fehbg 
+
+# -- Bindings --
+
+# change vol
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% && $refresh_i3status
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% && $refresh_i3status
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
+bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
+
+# change brightness
+bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 10%-
+bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set 10%+
+
+floating_modifier $mod
+tiling_drag modifier titlebar
 
 # start a terminal
-bindsym $super+Return exec i3-sensible-terminal
-
-# start dmenu (a program launcher)
-bindsym $super+Shift+d exec i3-dmenu-desktop --dmenu="dmenu -i -fn 'Noto Sans:size=8'"
-bindsym $super+d exec rofi -lines 12 -padding 18 -width 60 -location 0 -show drun -sidebar-mode -columns 3 -font 'Noto Sans 8'
-
-# common apps keybinds
-bindsym Print exec scrot 'Cheese_%a-%d%b%y_%H.%M.png' -e 'viewnior ~/$f'
-bindsym $super+l exec i3lock -i ~/.wallpaper.png
-bindsym $super+Shift+w exec firefox
-bindsym $super+Shift+f exec thunar;workspace 3;focus
-bindsym $super+Shift+g exec geany
-
-#change volume
-bindsym XF86AudioRaiseVolume exec amixer -q set Master 5%+
-bindsym XF86AudioLowerVolume exec amixer -q set Master 5%-
-bindsym XF86AudioMute exec amixer set Master toggle
-
-# music control
-bindsym XF86AudioNext exec mpc next
-bindsym XF86AudioPrev exec mpc prev
-bindsym XF86AudioPlay exec mpc toggle
-bindsym XF86AudioStop exec mpc stop
+bindsym $mod+Return exec alacritty
 
 # kill focused window
-bindsym $super+c kill
-bindsym $alt+F4 kill
+bindsym $mod+q kill
 
-# change focus
-bindsym $super+Left focus left
-bindsym $super+Down focus down
-bindsym $super+Up focus up
-bindsym $super+Right focus right
+# rofi bindings
+bindsym Control+space exec rofi -show drun -normal-window
+bindsym $mod+Control+r exec rofi -show run -normal-window
+bindsym Mod1+Tab exec rofi -show window -normal-window
+bindsym $mod+v exec ~/.config/rofi/bin/clipboard
+bindsym XF86PowerOff exec ~/.config/rofi/bin/powermenu
 
-# move focused window
-bindsym $super+Shift+Left move left
-bindsym $super+Shift+Down move down
-bindsym $super+Shift+Up move up
-bindsym $super+Shift+Right move right
+# screenshot bindings
+bindsym Print exec          xfce4-screenshooter -f -s ~/Pictures
+bindsym Shift+Print exec    xfce4-screenshooter -rc
+
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
 
 # split in horizontal orientation
-bindsym $super+h split h
+bindsym $mod+Shift+h split h
 
 # split in vertical orientation
-bindsym $super+v split v
+bindsym $mod+Shift+v split v
 
 # enter fullscreen mode for the focused container
-bindsym $super+f fullscreen toggle
+bindsym $mod+f fullscreen toggle
 
-# change container layout split
-bindsym $super+s layout toggle split
+# change container layout (stacked, tabbed, toggle split)
+bindsym $mod+s layout toggle all
+bindsym $mod+e layout toggle split
 
 # toggle tiling / floating
-bindsym $super+space floating toggle
+bindsym $mod+Shift+space floating toggle
 
 # change focus between tiling / floating windows
-bindsym $super+Shift+space focus mode_toggle
+bindsym $mod+space focus mode_toggle
+
+# focus the parent container
+bindsym $mod+a focus parent
+
+# focus the child container
+#bindsym $mod+d focus child
+
 
 # switch to workspace
-bindsym $alt+Control+Right workspace next
-bindsym $alt+Control+Left workspace prev
-bindsym $super+1 workspace 1
-bindsym $super+2 workspace 2
-bindsym $super+3 workspace 3
-bindsym $super+4 workspace 4
-bindsym $super+5 workspace 5
-bindsym $super+6 workspace 6
+bindsym $mod+1 workspace number $ws0
+bindsym $mod+2 workspace number $ws1
+bindsym $mod+3 workspace number $ws2
+bindsym $mod+4 workspace number $ws3
 
 # move focused container to workspace
-bindsym $super+Shift+1 move container to workspace 1
-bindsym $super+Shift+2 move container to workspace 2
-bindsym $super+Shift+3 move container to workspace 3
-bindsym $super+Shift+4 move container to workspace 4
-bindsym $super+Shift+5 move container to workspace 5
-bindsym $super+Shift+6 move container to workspace 6
+bindsym $mod+Shift+1 move container to workspace number $ws0
+bindsym $mod+Shift+2 move container to workspace number $ws1
+bindsym $mod+Shift+3 move container to workspace number $ws2
+bindsym $mod+Shift+4 move container to workspace number $ws3
 
+# reload the configuration file
+bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
-bindsym $super+Shift+r restart
+bindsym $mod+Shift+r restart
 
-# exit i3
-bindsym $super+q exec "i3-nagbar -t warning -m 'Really, exit?' -b 'Yes' 'i3-msg exit'"
+# exit i3 (logs you out of your X session)
+
+bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
-        bindsym Left resize shrink width 5 px or 5 ppt
-        bindsym Down resize grow height 5 px or 5 ppt
-        bindsym Up resize shrink height 5 px or 5 ppt
-        bindsym Right resize grow width 5 px or 5 ppt
+        # These bindings trigger as soon as you enter the resize mode
+
+
+        # same bindings, but for the arrow keys
+        bindsym Left resize shrink width 50 px or 50 ppt
+        bindsym Down resize grow height 50 px or 50 ppt
+        bindsym Up resize shrink height 50 px or 50 ppt
+        bindsym Right resize grow width 50 px or 50 ppt
+
+        # back to normal: Enter or Escape or $mod+r
         bindsym Return mode "default"
+        bindsym Escape mode "default"
+        bindsym $mod+r mode "default"
 }
-bindsym $super+r mode "resize"
+bindsym $mod+r mode "resize"
 
-# panel
-bar {
-        colors {
-        background #2f343f
-        statusline #2f343f
-        separator #4b5262
+# bar {
+    # position top
+    # status_command /usr/bin/bumblebee-status \
+        # -m battery nic datetime \
+        # -t powerline
+# }
 
-        # colour of border, background, and text
-        focused_workspace       #2f343f #bf616a #d8dee8
-        active_workspace        #2f343f #2f343f #d8dee8
-        inactive_workspace      #2f343f #2f343f #d8dee8
-        urgent_workspacei       #2f343f #ebcb8b #2f343f
-    }
-        status_command i3status
-}
+# -- Border --
 
-# window rules, you can find the window class using xprop
-for_window [class=".*"] border pixel 4
-assign [class=URxvt] 1
-assign [class=Firefox|Transmission-gtk] 2
-assign [class=Thunar|File-roller] 3
-assign [class=Geany|Evince|Gucharmap|Soffice|libreoffice*] 4
-assign [class=Audacity|Vlc|mpv|Ghb|Xfburn|Gimp*|Inkscape] 5
-assign [class=Lxappearance|System-config-printer.py|Lxtask|GParted|Pavucontrol|Exo-helper*|Lxrandr|Arandr] 6
-for_window [class=Viewnior|feh|Audacious|File-roller|Lxappearance|Lxtask|Pavucontrol] floating enable
-for_window [class=URxvt|Firefox|Geany|Evince|Soffice|libreoffice*|mpv|Ghb|Xfburn|Gimp*|Inkscape|Vlc|Lxappearance|Audacity] focus
-for_window [class=Xfburn|GParted|System-config-printer.py|Lxtask|Pavucontrol|Exo-helper*|Lxrandr|Arandr] focus
-
-# colour of border, background, text, indicator, and child_border
-client.focused              #bf616a #2f343f #d8dee8 #bf616a #d8dee8
-client.focused_inactive     #2f343f #2f343f #d8dee8 #2f343f #2f343f
-client.unfocused            #2f343f #2f343f #d8dee8 #2f343f #2f343f
-client.urgent               #2f343f #2f343f #d8dee8 #2f343f #2f343f
-client.placeholder          #2f343f #2f343f #d8dee8 #2f343f #2f343f
-client.background           #2f343f
+default_border pixel 0
+gaps inner 16
+gaps outer 16
+gaps top 74
