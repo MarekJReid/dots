@@ -1,0 +1,24 @@
+layout {
+    tab name="Execs" {
+        split direction="Right" {
+            split direction="Down" {
+                pane name="Backend"
+                pane name="Service"
+            }
+            pane name="Frontend"
+        }
+    }
+    tab name="Docker" {
+        pane name="Docker"
+    }
+    tab name="Coding Backend" {
+        pane name="Coding Backend"
+    }
+    tab name="Coding Frontend" {
+        pane name="Coding Frontend"
+    }
+    tab name="Httpie" {
+        pane name="Httpie"
+    }
+}
+
